@@ -1,0 +1,6 @@
+{
+  "name": "Cloud Spend Anomaly Detection",
+  "description": "Real-Time Cloud Spend Anomaly Detection & Response System Prototype",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
