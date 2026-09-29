@@ -1,95 +1,136 @@
 # Real-Time Cloud Spend Anomaly Detection & Response System
 
-## Project Overview
+> **70% Project Milestone Implementation**  
+> An event-driven FinOps platform prototype designed for media streaming platforms with variable workloads.
 
-A prototype for a near real-time cloud spend anomaly detection system tailored for a media platform dealing with highly variable workloads (live streaming, video transcoding, etc.). 
+---
 
-Traditional cloud budget alerts are typically calculated daily or monthly, resulting in delayed notifications. By the time an alert is received, a significant amount of money may have been wasted due to runaway scaling, redundant resources, or unauthorized deployments.
+## 1. Project Overview
 
-This system monitors multiple continuous data streams (billing, resources, deployments, and workloads), detects cost anomalies instantly using statistical baselining, attributes the spike to specific resources and deployments, and notifies an accountable owner with actionable evidence in seconds rather than hours.
+Traditional cloud budget alerts operate on 24-hour or monthly batch billing reports. By the time an engineering team receives a notification, thousands of dollars in rogue autoscaler expansions or runaway compute have already been burned.
 
-This represents the **35% project milestone**.
+**FinOps Sentinel** continuously correlates 4 real-time data streams:
+1. Hourly Cloud Billing Meters
+2. Cluster Autoscaling & Resource Mutation Events
+3. CI/CD Application Deployments
+4. Application Workload & Telemetry Metrics
 
-## Architecture
+Using a multi-signal ensemble combining rule-based baselines, statistical outlier analysis (Z-score & EWMA), and workload elasticity modeling, the system flags cost anomalies in **under 5 seconds** and dispatches actionable root-cause evidence in **under 15 seconds**.
 
-The system is a full-stack Next.js web application implementing an event-driven architecture pattern:
+---
 
-*   **Frontend**: React (Next.js App Router), Tailwind CSS, Recharts for data visualization.
-*   **State Management & Engine**: Zustand store containing an in-memory event bus and reconciliation layer.
-*   **Data Ingestion**: Processes 4 streams:
-    *   Hourly Billing Stream
-    *   Resource Change Events
-    *   Deployment Events
-    *   Workload Metrics
-*   **Detection Engine**: Calculates a rolling statistical baseline (using standard deviation/z-score and percentage increases).
-*   **Attribution Engine**: Correlates billing anomalies with recent resource scaling and application deployments.
+## 2. Architecture & Technology Stack
 
-## Technology Stack
+* **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS v4, Lucide Icons, Recharts
+* **State & Reconciliation Engine**: Zustand in-memory deterministic event bus with idempotency filtering and chronological sorting
+* **Persistence**: Dual-layer architecture with Node.js SQLite (`data/finops.db`) and file-backed state replication
+* **RBAC Context**: Simulated enterprise authorization personas (Operator, FinOps Analyst, Service Owner, Admin)
+* **Testing**: Automated in-browser test runner (`/tests`) and standalone CLI verification suite (`tests/run-tests.mjs`)
 
-*   React 19
-*   Next.js 15 (App Router)
-*   TypeScript
-*   Tailwind CSS (v4)
-*   Zustand (State Management)
-*   Recharts (Data Visualization)
-*   Lucide React (Icons)
-*   date-fns (Date manipulation)
+---
 
-## How to Install and Run
+## 3. End-to-End Demonstration Scenario (Section 32)
 
-1.  **Install dependencies:**
-    \`\`\`bash
-    npm install
-    \`\`\`
+The system is pre-loaded with a realistic media platform benchmark scenario:
+* **Resource**: `GPU-TRANSCODER-07`
+* **Application**: `video-transcoder`
+* **Deployment**: `video-transcoder-v42`
+* **Accountable Owner**: `Media Processing Team`
+* **Historical Baseline**: `$72.00/hour`
+* **Actual Ingested Rate**: `$186.00/hour` (+158%)
+* **Resource Allocation**: `8 → 22` NVIDIA A10G GPU nodes
+* **Workload Growth**: `+12%` (1,200 → 1,344 jobs/hour)
+* **GPU Utilization**: Rose to 91% due to queue backlog, despite massive capacity over-allocation
+* **Composite Anomaly Score**: `0.94` (**CRITICAL**)
+* **Projected 6-Hour Excess Cost**: **$732.00**
 
-2.  **Run the development server:**
-    \`\`\`bash
-    npm run dev
-    \`\`\`
-    The application will be available at \`http://localhost:3000\`.
+---
 
-## 35% Milestone Achieved
+## 4. Key 70% Features
 
-This prototype fully demonstrates:
-*   Real-time event ingestion simulation.
-*   Rolling baseline calculation (Z-score and Percentage difference).
-*   Attribution of anomalies to specific resources and deployments.
-*   Evidence generation (comparing resource growth vs workload growth).
-*   Simulated owner notification.
-*   Manual override workflow with a persistent Audit Trail.
-*   Resilience testing against edge cases (duplicates, delayed events, out-of-order events).
-*   Experiment tracking (TP/FP/TN/FN).
+1. **Advanced Detection Ensemble**:
+   - **Detector A**: Rule-based baseline percentage deviation.
+   - **Detector B**: Statistical outlier detection (Z-score & EWMA).
+   - **Detector C**: Workload-aware elasticity (detecting cost surging 13.2x faster than jobs).
+   - **Composite Score**: Weighted multi-signal fusion (0.0 to 1.0).
 
-## Demonstration Flow (Demo Instructions)
+2. **Root-Cause Correlation & Attribution**:
+   - $\pm 15$ minute correlation window linking deployment commit to autoscaler scale-out.
+   - Causal visual timeline from deployment to multi-channel notification.
+   - Resource, service, deployment, and cloud region cost attribution breakdown.
 
-1.  Open the application. The **Dashboard** is pre-loaded with 24 hours of normal synthetic background data, followed by a sudden CRITICAL anomaly at the end of the timeline.
-2.  Observe the KPI cards showing the latency metrics (< 5s detection, < 30s notification) vs the baseline (60 mins).
-3.  Click "Investigate" on the CRITICAL anomaly in the Recent Anomalies table.
-4.  On the **Anomaly Details** page, review the Explanation, identifying that GPU scaling increased 4x, but workload only increased by 19%.
-5.  Click **Manual Override**, enter a reason, and approve the recommended rollback action.
-6.  Navigate to the **Audit Trail** to see the immutable record of your decision.
-7.  Navigate to the **Event Stream** and use the **Data Ingestion Simulator** to inject a cost spike live and watch the system react in real time.
-8.  Navigate to **Failure Tests** to run distributed-system edge-case simulations (Duplicate events, delayed events).
+3. **Short-Term Forecasting & What-If Analysis**:
+   - Linear regression and EWMA cost forecasts for 1h, 6h, and 24h horizons.
+   - Interactive `/what-if` modeling page allowing operators to simulate savings from replica caps and rollbacks.
 
-## Detection Methodology
+4. **Incident Lifecycle & Non-Destructive Containment**:
+   - Status transitions (`DETECTED` → `INVESTIGATING` → `ACKNOWLEDGED` → `ACTION_PROPOSED` → `APPROVED` → `RESOLVED`).
+   - Human-in-the-loop manual override with mandatory technical justification.
+   - Append-only immutable audit trail with actor role logging.
 
-The system uses a rolling 24-hour historical window. For every incoming billing event, it calculates the mean ($\mu$) and standard deviation ($\sigma$) of the previous 24 hours for that specific resource.
-*   **Z-Score**: $z = (x - \mu) / \sigma$
-*   **Percentage Increase**: $p = ((x - \mu) / \mu) * 100$
+5. **Empirical Benchmarking & Sensitivity Analysis**:
+   - 20 synthetic scenarios evaluated dynamically across Rule, Statistical, Workload, and Ensemble models.
+   - Interactive threshold slider (0.50 to 0.90) dynamically recalculating Precision, Recall, F1, FPR, and FNR.
 
-An event is flagged as **CRITICAL** if $p > 100\%$ AND $z > 2.0$. Configurable thresholds determine HIGH and WARNING severities.
+6. **Failure Test Center**:
+   - 10 interactive resilience tests verifying idempotency, delayed deployment metadata, out-of-order event sorting, and legitimate sports broadcast surges.
 
-## Edge-Case Handling
+7. **Stakeholder Validation & Performance Benchmark**:
+   - 7-factor structured evaluation questionnaire with aggregated ratings.
+   - Performance test generating 1k to 25k continuous events with actual measured throughput (events/sec).
 
-*   **Duplicate Events**: Events are uniquely identified by a UUID. The ingestion layer checks for existing IDs and drops duplicates.
-*   **Delayed/Out-of-Order Events**: The store sorts events by their logical \`timestamp\` rather than arrival time, ensuring that delayed resource changes correctly correlate with subsequent billing events.
+---
 
-## Future Extension (Remaining 65%)
+## 5. Quick Start Instructions
 
-For the remaining project milestones, this prototype will be extended with:
-*   Real cloud provider billing API integration (e.g., AWS Cost Explorer API, GCP Cloud Billing API).
-*   Kafka/PubSub event streaming instead of in-memory ingestion.
-*   Persistent production database (PostgreSQL/Cloud SQL).
-*   Advanced ML-based anomaly detection (Isolation Forests or Autoencoders) instead of simple Z-score.
-*   Real notification integrations (Slack, PagerDuty, Email).
-*   Authentication and Role-Based Access Control (RBAC).
+### Prerequisites
+* Node.js 18, 20, or 22
+* npm or bun
+
+### Exact Installation Command
+```bash
+npm install
+```
+
+### Exact Run Command
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Automated Test Suite
+```bash
+node tests/run-tests.mjs
+```
+Or open `/tests` directly in the running web application.
+
+---
+
+## 6. Demo Roles & Credentials
+
+No external credentials required. Use the **Role Selector** dropdown in the top navigation header to test different RBAC personas:
+* **Operator**: Can acknowledge incidents, investigate root cause, and apply manual overrides.
+* **FinOps Analyst**: Can tune detection thresholds, view analytics, and inspect unit costs.
+* **Service Owner**: Can review team-owned alerts and approve deployment rollbacks.
+* **Admin**: Unrestricted access to all configuration, settings, and replay tools.
+
+---
+
+## 7. 70% Milestone Completed
+
+| Requirement | Status | Evidence in Application |
+|---|---|---|
+| Advanced anomaly detection | Completed | Detector comparison on `/experiments` & `/` |
+| Root-cause correlation | Completed | Causal timeline on `/anomalies/[id]` |
+| Forecasting | Completed | Forecast cards on `/anomalies/[id]` & `/` |
+| What-if analysis | Completed | Interactive simulator on `/what-if` |
+| Failure handling | Completed | 10 automated test cases on `/failure-tests` |
+| FP/FN analysis | Completed | 20 benchmark scenarios on `/experiments` |
+| Stakeholder validation | Completed | 7-factor evaluation on `/validation` |
+| Persistence | Completed | SQLite / file storage in `lib/db.ts` & `data/` |
+| Audit trail | Completed | Append-only audit table on `/audit` |
+| Manual override | Completed | Human-in-the-loop modal on `/anomalies/[id]` |
+| Performance testing | Completed | High-throughput benchmark on `/performance` |
+
+---
+*FinOps Sentinel — Prototype built for academic demonstration and research purposes.*
