@@ -38,7 +38,18 @@ const PIE_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#3b82f6'];
 export default function Dashboard() {
   const { billingEvents, workloadMetrics, anomalies, systemLogs, getDataQualityMetrics, isSimulating } = useStore();
   const [mounted, setMounted] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [showTour, setShowTour] = useState(true);
   const [logFilter, setLogFilter] = useState<'ALL' | 'ANOMALY' | 'WARNING' | 'INFO'>('ALL');
+
+  const TOUR_STEPS = [
+    { title: '1. Baseline Run-Rate', desc: 'Monitors historical spend ($72.00/hr) across 24h rolling windows using EWMA & Z-Score.', link: '/settings', linkText: 'View Thresholds' },
+    { title: '2. Rogue Auto-Scaling', desc: 'Deployment video-transcoder-v42 triggers unauthorized ASG expansion from 2 to 8 GPU nodes (+158% spend).', link: '/event-stream', linkText: 'View Event Stream' },
+    { title: '3. Multi-Detector Fusion', desc: 'Combines Rule-based (+158%), Statistical (Z=6.4), and Workload-elasticity disparity into a 0.94 score.', link: '/experiments', linkText: 'View Experiments' },
+    { title: '4. Root-Cause Attribution', desc: 'Directly correlates cost spike with deployment video-transcoder-v42 and IAM autoscaling change.', link: '/anomalies', linkText: 'View Attribution' },
+    { title: '5. Multi-Channel Alert', desc: 'Dispatches high-priority Slack, Email, and PagerDuty notifications within 12.5s SLA (<15s target).', link: '/workflow', linkText: 'View Workflow' },
+    { title: '6. FinOps Manual Override', desc: 'Human-in-the-loop review approves rollback with immutable SOX 404 audit logging.', link: '/audit', linkText: 'View Audit Trail' },
+  ];
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -111,6 +122,61 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 pb-12">
+      {/* Guided Evaluation Tour / Walkthrough */}
+      {showTour && (
+        <div className="rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-950/40 via-slate-900 to-indigo-950/30 p-4 shadow-lg">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            <div className="flex items-center space-x-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 font-mono font-bold text-sm shrink-0">
+                {tourStep + 1}/6
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs uppercase font-mono font-bold text-indigo-400">Project Walkthrough</span>
+                  <span className="text-sm font-bold text-white">• {TOUR_STEPS[tourStep].title}</span>
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  {TOUR_STEPS[tourStep].desc}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 shrink-0 self-end md:self-center">
+              <Link
+                href={TOUR_STEPS[tourStep].link}
+                className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+              >
+                {TOUR_STEPS[tourStep].linkText} →
+              </Link>
+              <button
+                onClick={() => setTourStep((prev) => (prev + 1) % TOUR_STEPS.length)}
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+              >
+                Next Step
+              </button>
+              <button
+                onClick={() => setShowTour(false)}
+                className="rounded-md px-2 py-1.5 text-xs text-slate-400 hover:text-slate-200"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+          {/* Step Progress indicators */}
+          <div className="mt-3 flex gap-1.5">
+            {TOUR_STEPS.map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => setTourStep(idx)}
+                className={`h-1 flex-1 rounded-full transition-all ${
+                  idx === tourStep ? 'bg-indigo-400' : 'bg-slate-800 hover:bg-slate-700'
+                }`}
+                title={s.title}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Top Banner Alert if Critical Anomaly Active */}
       {criticalAnomalies.length > 0 && (
         <div className="rounded-xl border border-red-500/40 bg-red-950/20 p-4 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

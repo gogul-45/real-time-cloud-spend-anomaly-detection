@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  finops-sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finops-sentinel-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - CLOUD_PROVIDER_DEFAULT=SIMULATOR
+      - DETECTION_WINDOW_HOURS=24
+      - PROMETHEUS_METRICS_ENABLED=true
+    volumes:
+      - finops-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  finops-data:
+    driver: local
